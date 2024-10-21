@@ -5,7 +5,7 @@
 
 set php_ver 8.3
 
-function user_remove -a the_user
+function user_remove -a the_user --wraps userdel -a the_user --description 'Remove a user and associated resources such as php-fpm pool.'
     # if php_ver is 6.0 then php_ver_short is 60
     set php_ver_short $(echo $php_ver | tr -d \.)
 
@@ -25,8 +25,9 @@ function user_remove -a the_user
     # delete nginx files
     if test -f /etc/nginx/conf.d/fpm"$php_ver_short"_$the_home.conf
         rm /etc/nginx/conf.d/fpm"$php_ver_short"_$the_home.conf
-        nginx -t &>/dev/null && systemctl restart nginx
-        echo Removed the nginx file.
+        echo; echo Testing nginx conf.
+        nginx -t
+        echo; echo Removed the nginx file.
     end
 
     # remove PHP conf

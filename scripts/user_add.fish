@@ -47,6 +47,8 @@ function user_add -a the_user the_pass enable_sudo
         user = $the_user
         group = $the_user
         listen = $php_socket
+        listen.owner = $the_user
+        listen.group = $the_user
         listen.mode = 0660
         pm = ondemand
         pm.max_children = 40
@@ -65,7 +67,7 @@ function user_add -a the_user the_pass enable_sudo
     # create nginx files
     if not test -f /etc/nginx/conf.d/fpm"$php_ver_short"_$the_home.conf
         echo "upstream fpm"$php_ver_short"_$the_home { server unix:$php_socket; }" > /etc/nginx/conf.d/fpm"$php_ver_short"_$the_home.conf
-        nginx -t && systemctl restart nginx
+        # nginx -t && systemctl reload nginx
         echo Added nginx conf.
     end
 
