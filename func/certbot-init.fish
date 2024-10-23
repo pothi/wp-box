@@ -3,6 +3,9 @@
 # To be placed in $fish_function_path
 # most likely in ~/.config/fish/functions
 
+# TODO
+# install certbot-dns-* plugins via snap
+
 set CERTBOT_ADMIN_EMAIL
 set restart_script /etc/letsencrypt/renewal-hooks/deploy/nginx-restart.sh
 
@@ -86,6 +89,16 @@ function __certbot-init_initialize
 
     snap install --classic certbot
     ln -fs /snap/bin/certbot /usr/bin/certbot
+
+    # prepare to install (dns) plugins
+    # ref: https://certbot.eff.org/instructions?ws=nginx&os=snap&tab=wildcard
+    snap set certbot trust-plugin-with-root=ok
+
+    # install plugins
+    snap install certbot-dns-cloudflare
+
+    # to see list the dns plugins...
+    # snap find certbot-dns
 
     test -d ~/backups/etc-certbot-default-(date +%F) || cp -a /etc ~/backups/etc-certbot-default-(date +%F)
 

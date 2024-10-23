@@ -24,10 +24,12 @@ function user_add -a the_user the_pass enable_sudo
     set the_home $(echo $the_user | awk -F _ '{print $1}')
 
     # create the user
-    if not id -u $the_user 2>/dev/null
+    if not id -u $the_user &>/dev/null
         useradd --shell=/bin/bash -m --home-dir /home/$the_home $the_user
         chmod 755 /home/$the_home
         chsh -s /usr/bin/fish $the_user
+    else
+        echo User already exists.
     end
 
     # sets the supplied password or a new password
