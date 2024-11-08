@@ -3,6 +3,7 @@
 # https://wp-cli.org/#installing
 
 set BinDir ~/.local/bin
+set InstallDir ~/.local/aws-cli
 set fish_completion_dir ~/.config/fish/completions
 
 # attempt to create BinDir and fish_completion_dir
@@ -22,33 +23,51 @@ if not test $status
     echo >&2 'You may create it manually and re-run this script.'
 end
 
-set wp_cli "$BinDir/wp"
-#--- Install wp cli ---#
-if not test -s "$wp_cli"
-    printf '%-72s' "Downloading WP CLI..."
-    set wp_cli_url https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    if ! curl -LSs -o "$wp_cli" $wp_cli_url; then
-        echo >&2 'wp-cli: error downloading wp-cli.'
-        exit 1
+set tmpfile /tmp/aws_cli_v2.zip
+set aws_cli "$BinDir/aws"
+
+printf '%-72s' "Downloading AWS CLI..."
+set aws_cli_url https://awscli.amazonaws.com/awscli-exe-linux-$(arch).zip
+if ! curl -LSs -o $tmpfile $aws_cli_url; then
+    echo >&2 'aws-cli: error downloading aws cli'
+    exit 1
+end
+unzip -qq -d /tmp/ $tmpfile
+
+if not test -s "$aws_cli"
+    # Install aws cli
+    if /tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir > /dev/null
+        chmod +x "$aws_cli"
+    else
+        echo >&2 Error installing aws cli.
     end
-    chmod +x "$wp_cli"
-
-    echo done.; echo
-
-    # check the installation
-    wp cli info
-
+else
+    # Update aws cli, if existing installation is found
+    if not /tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir --update > /dev/null
+        echo >&2 Error updating aws cli.
+    end
 end
 
-# wp cli fish completion
-if not test -s "$fish_completion_dir/wp-completion.fish"
+echo done.; echo
+
+# check the installation
+aws --version
+
+rm $tmpfile
+rm -rf /tmp/aws # created when unziping the downloaded aws cli zip file
+
+exit
+
+# fish cli fish completion
+if not test -s "$fish_completion_dir/wp.fish"
     if ! curl -LSs -o "$fish_completion_dir/wp.fish" https://github.com/wp-cli/wp-cli/raw/refs/heads/main/utils/wp.fish
         echo >&2 'wp-cli: error downloading fish completion script.'
     end
 end
 
 # set -l fish_trace non_empty_value
-#--- cron: auto-update wp-cli ---#
+# TODO
+#--- cron: auto-update aws cli ---#
 crontab -l 2>/dev/null | grep -qF 'wp cli update'
 if test $status -ne 0
     begin; crontab -l 2>/dev/null; echo; echo "@daily wp cli update --yes >> ~/log/wp-cli.log 2>&1"; end | crontab -

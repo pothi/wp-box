@@ -135,3 +135,5 @@ function __certbot-init_print_help
     printf "\nFor more info, changelog and documentation... https://github.com/pothi/\n"
 
 end
+
+certbot-init $argv
