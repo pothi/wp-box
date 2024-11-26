@@ -56,9 +56,19 @@ aws --version
 rm $tmpfile
 rm -rf /tmp/aws # created when unziping the downloaded aws cli zip file
 
+# include PATH into cron, if PATH doesn't exist
+crontab -l | grep -qF "PATH="
+if test $status -ne 0
+    begin; echo "PATH=$(echo $PATH | sed 's/ /:/g')" && echo && crontab -l 2>/dev/null; end | crontab -
+    echo PATH is included in the crontab.
+else
+    echo PATH is already present in cron.
+end
+
 exit
 
 # fish cli fish completion
+# TODO
 if not test -s "$fish_completion_dir/wp.fish"
     if ! curl -LSs -o "$fish_completion_dir/wp.fish" https://github.com/wp-cli/wp-cli/raw/refs/heads/main/utils/wp.fish
         echo >&2 'wp-cli: error downloading fish completion script.'
@@ -77,12 +87,3 @@ else
 end
 
 # set -l fish_trace
-# include PATH into cron, if PATH doesn't exist
-crontab -l | grep -qF "PATH="
-if test $status -ne 0
-    begin; echo "PATH=$(echo $PATH | sed 's/ /:/g')" && echo && crontab -l 2>/dev/null; end | crontab -
-    echo PATH is included in the crontab.
-else
-    echo PATH is already present in cron.
-end
-
