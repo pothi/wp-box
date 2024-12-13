@@ -61,7 +61,7 @@ end
 # include PATH into cron, if PATH doesn't exist
 crontab -l | grep -qF "PATH="
 if test $status -ne 0
-    begin; echo "PATH=$(echo $PATH | sed 's/ /:/g')" && echo && crontab -l 2>/dev/null; end | crontab -
+    begin; echo "PATH=$(echo $PATH | sed 's_ /_:/_g')" && echo && crontab -l 2>/dev/null; end | crontab -
     echo PATH is included in the crontab.
 else
     echo PATH is already present in cron.
