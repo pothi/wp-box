@@ -44,7 +44,7 @@ end
 # ref: https://www.server-world.info/en/note?os=Debian_10&p=locale - once you installed locales-all, you can not use the accepted solution from askubuntu.
 set lang $LANG
 if not test "$lang" = "en_US.UTF-8"
-    if dpkg-query -W -f='${Status}' locales 2>/dev/null | grep -q "ok installed" 
+    if dpkg-query -W -f='${Status}' locales 2>/dev/null | grep -q "ok installed"
         :
     else
         # printf '%-72s' "Installing locale..."
@@ -54,7 +54,8 @@ if not test "$lang" = "en_US.UTF-8"
     # localectl set-locale LANG=en_US.UTF-8
     locale-gen en_US.UTF-8 >/dev/null
     update-locale LANG=en_US.UTF-8
-    source /etc/default/locale
+    # source /etc/default/locale # can't be used on fish shell
+    set LANG (cat /etc/default/locale | sed 's/.*=//g')
 end
 
 set required_packages "
@@ -178,44 +179,12 @@ printf '%-72s' "Restarting Nginx..."
 nginx -t 2>/dev/null && systemctl restart nginx
 echo done.
 
-function certbot_init
-    echo --------------------------- Certbot -----------------------------------------
-    snap install core
-    snap refresh core
-    DEBIAN_FRONTEND=noninteractive apt-get -qq remove certbot
-    snap install --classic certbot
-    ln -fs /snap/bin/certbot /usr/bin/certbot
-
-    # register certbot account if email is supplied
-    if test $CERTBOT_ADMIN_EMAIL
-        certbot show_account &> /dev/null
-        if $status != "0"
-            certbot -m $CERTBOT_ADMIN_EMAIL --agree-tos --no-eff-email register
-        end
-    end
-
-    # Restart script upon renewal; it can also alert upon success or failure
-    # See - https://github.com/pothi/snippets/blob/main/ssl/nginx-restart.sh
-    [ ! -d /etc/letsencrypt/renewal-hooks/deploy/ ] && mkdir -p /etc/letsencrypt/renewal-hooks/deploy/
-    set restart_script /etc/letsencrypt/renewal-hooks/deploy/nginx-restart.sh
-    set restart_script_url https://github.com/pothi/snippets/raw/main/ssl/nginx-restart.sh
-    if test ! -f "$restart_script"
-        wget -q -O $restart_script $restart_script_url
-        check_result $status 'Could not download Nginx Restart Script for Certbot renewals.'
-        chmod +x $restart_script
-    end
-
-    test -d ~/backup/etc-certbot-default || cp -a /etc ~/backups/etc-certbot-default
-end
-
-certbot_init
-
 function sudo_add
 end
 
 function user_add
 end
- 
+
 function enable_passwd_auth_for_group
 end
 
