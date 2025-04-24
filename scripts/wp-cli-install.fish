@@ -47,23 +47,24 @@ if not test -s "$fish_completion_dir/wp.fish"
     end
 end
 
-# set -l fish_trace non_empty_value
-#--- cron: auto-update wp-cli ---#
-crontab -l 2>/dev/null | grep -qF 'wp cli update'
-if test $status -ne 0
-    begin; crontab -l 2>/dev/null; echo; echo "@daily wp cli update --yes >> ~/log/wp-cli.log 2>&1"; end | crontab -
-    echo 'A new cron entry is created to update daily, if an update is available.'
-else
-    echo A cron entry is already in place to update wp-cli!
-end
+#--- systemctl timer: auto-update wp-cli ---#
+echo Configuring systemctl timer to auto-update wp-cli.
 
-# set -l fish_trace
-# include PATH into cron, if PATH doesn't exist
-crontab -l | grep -qF "PATH="
-if test $status -ne 0
-    begin; echo "PATH=$(echo $PATH | sed 's_ /_:/_g')" && echo && crontab -l 2>/dev/null; end | crontab -
-    echo PATH is included in the crontab.
-else
-    echo PATH is already present in cron.
-end
+test -d ~/.config/systemd/user || mkdir -p ~/.config/systemd/user
+
+wget -q -P ~/.config/systemd/user   https://github.com/pothi/wp-box/raw/refs/heads/main/files/wpcli-update.service
+wget -q -P ~/.config/systemd/user   https://github.com/pothi/wp-box/raw/refs/heads/main/files/wpcli-update.timer
+
+systemctl --user enable wpcli-update.timer
+
+# if the following error is received...
+# Failed to connect to bus: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)
+# you are trying to do the above as sudo (after logging as normal user then root). Login as normal user and then execute the above.
+
+systemctl --user start wpcli-update.timer
+systemctl --user enable wpcli-update.service
+systemctl --user start wpcli-update.service
+
+# Verify
+systemctl --user list-timers
 
