@@ -1,0 +1,16 @@
+# Version 1.0
+# Keep it on ~/.config/systemd/user/
+
+# Run the following...
+# systemctl --user enable wpcli-update.service
+# systemctl --user start wpcli-update.service
+
+[Unit]
+Description=wpcli update service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/wp cli update --yes
+
+[Install]
+WantedBy=default.target
