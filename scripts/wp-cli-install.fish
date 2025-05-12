@@ -36,8 +36,11 @@ if not test -s "$wp_cli"
     echo done.; echo
 
     # check the installation
-    wp cli info
+    wp cli version
 
+else
+    echo wp cli already exists.
+    wp cli version
 end
 
 # wp cli fish completion
@@ -46,9 +49,10 @@ if not test -s "$fish_completion_dir/wp.fish"
         echo >&2 'wp-cli: error downloading fish completion script.'
     end
 end
+echo; echo 'auto completion is enabled for wp cli.'
 
 #--- systemctl timer: auto-update wp-cli ---#
-echo Configuring systemctl timer to auto-update wp-cli.
+echo; echo Configuring systemctl timer to auto-update wp-cli.
 
 test -d ~/.config/systemd/user || mkdir -p ~/.config/systemd/user
 
