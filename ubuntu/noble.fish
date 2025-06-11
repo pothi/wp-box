@@ -2,7 +2,7 @@
 
 set php_ver 8.3
 
-# DEBIAN_FRONTEND=noninteractive apt-add-repository ppa:fish-shell/release-3 -y && apt-get install fish -y
+# apt-add-repository ppa:fish-shell/release-4 -y && apt-get install fish -y
 
 test -d ~/backups || mkdir -p ~/backups
 
