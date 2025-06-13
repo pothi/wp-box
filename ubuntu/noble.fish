@@ -9,7 +9,7 @@ test -d ~/backups || mkdir -p ~/backups
 # by default, WP User will be created with sudo privileges.
 set does_wp_user_need_sudo yes
 
-function check_result iStatus iMsg
+function check_result -a iStatus -a iMsg
     if [ $iStatus -ne 0 ]; then
         echo -e "\nError: $iMsg. Exiting!\n"
         exit $iStatus
@@ -22,7 +22,7 @@ function iAPT -a package
         :
     else
         printf '%-72s' "Installing '$package' ..."
-        DEBIAN_FRONTEND=noninteractive apt-get -qq install $package > /dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get -qq install $package > /dev/null 2> /dev/null
         echo done.
     end
 end
