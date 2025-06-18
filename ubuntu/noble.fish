@@ -4,6 +4,8 @@ set php_ver 8.3
 
 # apt-add-repository ppa:fish-shell/release-4 -y && apt-get install fish -y
 
+chsh --shell /usr/bin/fish
+
 test -d ~/backups || mkdir -p ~/backups
 
 # by default, WP User will be created with sudo privileges.
@@ -147,13 +149,14 @@ sed -i "/disable_functions/c disable_functions = $PHP_PCNTL_FUNCTIONS,$PHP_EXEC_
 
 # echo -------------------------------- Nginx ----------------------------------------
 
-# Download WordPress Nginx repo
-if test ! -d ~/wp-nginx
+# Download WordPress Nginx repo, if default Nginx file is not found.
+if test ! -f /etc/nginx/sites-enabled/default.conf
     mkdir ~/wp-nginx
     wget -q -O- https://github.com/pothi/wordpress-nginx/tarball/main | tar -xz -C ~/wp-nginx --strip-components=1
     cp -a ~/wp-nginx/{conf.d,errors,globals,sites-available} /etc/nginx/
     test -d /etc/nginx/sites-enabled || mkdir /etc/nginx/sites-enabled
     ln -fs /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
+    rm -rf ~/wp-nginx
 end
 
 # Remove the default conf file supplied by OS
@@ -179,11 +182,10 @@ printf '%-72s' "Restarting Nginx..."
 nginx -t 2>/dev/null && systemctl restart nginx
 echo done.
 
-function sudo_add
-end
+wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/user_add.fish
+wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/sudo_add.fish
 
-function user_add
-end
+wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/certbot-init.fish
 
 function enable_passwd_auth_for_group
 end
