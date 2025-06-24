@@ -37,6 +37,12 @@ function certbot-init -d 'Initialize, register or update certbot'
         set CERTBOT_ADMIN_EMAIL $_flag_register
         # echo "Supplied Email: $CERTBOT_ADMIN_EMAIL"
         # return 0
+
+        # install certbot
+        if not command -q certbot
+            __certbot-init_initialize
+        end
+
         if not certbot show_account &> /dev/null
             certbot -m $CERTBOT_ADMIN_EMAIL --agree-tos --no-eff-email register
         else
@@ -126,9 +132,9 @@ function __certbot-init_print_help
 
     printf 'Usage: %s [-r/--register <email>] [-u/--update <email>] [-i/--init] [-v/--version] [-h/--help]\n\n' (status current-command)
 
+    printf '\t%s\t%s\n' "-i, --init" "Install and initialize certbot"
     printf '\t%s\t%s\n' "-r, --register" "Register a certbot account with the given email address."
     printf '\t%s\t%s\n' "-u, --update" "Update the existing certbot account with the given email address."
-    printf '\t%s\t%s\n' "-i, --init" "Install and initialize certbot"
     printf '\t%s\t%s\n' "-v, --version" "Prints the version info"
     printf '\t%s\t%s\n' "-h, --help" "Prints help"
 
