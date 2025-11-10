@@ -1,12 +1,13 @@
 #!/usr/bin/env fish
 
-# https://wp-cli.org/#installing
+# https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
 set BinDir ~/.local/bin
 set InstallDir ~/.local/aws-cli
 set fish_completion_dir ~/.config/fish/completions
 
 # attempt to create BinDir and fish_completion_dir
+test -d ~/tmp || mkdir -p ~/tmp
 test -d $BinDir || mkdir -p $BinDir
 if not test $status
     echo >&2 "BinDir is not found at $BinDir. This script can't create it, either!"
@@ -23,7 +24,7 @@ if not test $status
     echo >&2 'You may create it manually and re-run this script.'
 end
 
-set tmpfile /tmp/aws_cli_v2.zip
+set tmpfile ~/tmp/aws_cli_v2.zip
 set aws_cli "$BinDir/aws"
 
 printf '%-72s' "Downloading AWS CLI..."
@@ -32,18 +33,18 @@ if ! curl -LSs -o $tmpfile $aws_cli_url; then
     echo >&2 'aws-cli: error downloading aws cli'
     exit 1
 end
-unzip -qq -d /tmp/ $tmpfile
+unzip -qq -d ~/tmp/ $tmpfile
 
 if not test -s "$aws_cli"
     # Install aws cli
-    if /tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir > /dev/null
+    if ~/tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir > /dev/null
         chmod +x "$aws_cli"
     else
         echo >&2 Error installing aws cli.
     end
 else
     # Update aws cli, if existing installation is found
-    if not /tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir --update > /dev/null
+    if not ~/tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir --update > /dev/null
         echo >&2 Error updating aws cli.
     end
 end
@@ -54,7 +55,7 @@ echo done.; echo
 aws --version
 
 rm $tmpfile
-rm -rf /tmp/aws # created when unziping the downloaded aws cli zip file
+rm -rf ~/tmp/aws # created when unziping the downloaded aws cli zip file
 
 # include PATH into cron, if PATH doesn't exist
 crontab -l | grep -qF "PATH="
