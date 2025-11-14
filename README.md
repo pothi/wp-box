@@ -4,13 +4,20 @@
 
 * Fish Shell 4
 * Ubuntu LTS (24.04)
-+ Debian 12
++ Debian 12, 13
 
 ## How to get started?
 
 Manual installation steps...
 
 Adding a repository differs between Debian and Ubuntu. Other steps are common. See below...
+
+**To add the fish repo in Debian 13**
+
+```
+echo 'deb http://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/shells:fish:release:4.list
+curl -fsSL https://download.opensuse.org/repositories/shells:fish:release:4/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/shells_fish_release_4.gpg > /dev/null
+```
 
 **To add the fish repo in Debian 12**
 
