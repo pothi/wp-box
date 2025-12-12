@@ -87,11 +87,13 @@ function __swap_add -a swap_size
         # echo -----------------------------------------------------------------------------
 
         # check for swap file
-        if test ! -f $swap_file
-            # on a desktop, we may use fdisk to create a partition to be used as swap
-            fallocate -l "$swap_size"G "$swap_file" >/dev/null
-            if test $status -ne 0; echo Error: fallocate failed!; end
+        if test -f $swap_file
+            rm $swap_file
         end
+
+        # on a desktop, we may use fdisk to create a partition to be used as swap
+        fallocate -l "$swap_size"G "$swap_file" >/dev/null
+        if test $status -ne 0; echo Error: fallocate failed!; end
 
         # only root should be able to read it or / and write into it
         chmod 600 $swap_file
