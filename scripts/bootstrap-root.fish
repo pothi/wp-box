@@ -20,14 +20,12 @@ set debug
 # helper function to exit upon non-zero exit code of a command
 # usage some_command; check_status $? 'some_command failed'
 if not type -q check_status
-    function check_status -a iStatus iMsg
-        if test $iStatus -ne 0
-            echo >&2 -e "\nError: $iMsg.\n"
-            exit "$iStatus"
+    function check_status -a return_value error_message
+        if test $return_value -ne 0
+            echo >&2 -e "\nError: $error_message\n"
+            exit "$return_value"
         end
     end
-else
-    echo The function check_status already exists.
 end
 
 
