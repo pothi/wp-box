@@ -1,8 +1,13 @@
 #!/usr/bin/env fish
 
-set --local ver 1.2
+set --local ver 1.3
 
 # changelog
+# version: 1.3
+#   - date: 2026-03-24
+#   - install git
+#   - simplify naming schemes
+#   - better output
 # version: 1.2
 #   - date: 2026-03-19
 #   - change function name from check_result to check_status
@@ -28,21 +33,8 @@ if not type -q check_status
     end
 end
 
-
-# check the permission to write into $HOME
-set --local tmp_file_to_check_permission (mktemp --tmpdir=$HOME)
-if test $status -ne 0
-    echo Could not create the temp file at user home. Check the permissions.
-else
-    echo Permissions are okay.
-end
-sleep 1
-rm $tmp_file_to_check_permission
-check_status $status 'Could not remove the tmp file.'
-
-
 #-------------------- Git config --------------------#
-function __configure_git__root
+function __configure_git
     if command -q git
         if not test -f ~/.config/git/config
             # prepare location for git config
@@ -61,17 +53,14 @@ function __configure_git__root
         end
     else
         echo Warning: git does not exist.
+        fish_is_root_user; and begin; echo '%-72s' 'Installing git...'; apt-get install -qq git; echo done.; end
     end
 end
 
 #-------------------- Configure VIM --------------------#
-function __configure_vim__root
-    set --local current_vimrc ~/.config/vim/vimrc
-    set --local upstream_vimrc_url https://codeberg.org/pothi/vim/raw/branch/main/vimrc
 
-    echo "vimrc location: $current_vimrc"
-    echo Upstream vimrc URL: $upstream_vimrc_url
-
+# configure vim at ~/.config/vim/vimrc
+function __configure_vim
     # backup any existing ~/.vimr or ~/.vim/vimrc
     set --local vimrc_backup ~/.config/vim/vimrc-backup-(date +%s)
     set --local old_vimrc ~/.vimrc
@@ -93,6 +82,12 @@ function __configure_vim__root
         end
     end
     sleep 1
+
+    set --local current_vimrc ~/.config/vim/vimrc
+    set --local upstream_vimrc_url https://codeberg.org/pothi/vim/raw/branch/main/vimrc
+
+    echo "vimrc location: $current_vimrc"
+    echo Upstream vimrc URL: $upstream_vimrc_url
 
     test -d ~/.config/vim; or mkdir ~/.config/vim
     if not test -f "$current_vimrc"
@@ -124,10 +119,11 @@ function __configure_vim__root
     end
 
     # check support for ~/.config/vim/vimrc
-    if test $(vim --version | grep .config/vim/vimrc)
+    if test $(vim --version | grep -q '~/\.config/vim/vimrc')
         echo "Current Vim version supports ~/.config/vim/vimrc"
     else
         echo "Current Vim version does NOT support ~/.config/vim/vimrc"
+        echo '... So, creating a symlink for ~/.config/vim/vimrc to ~/.vimrc'
         ln -fs $current_vimrc ~/.vimrc
         check_status $status "Could not create symlink from $current_vimrc to ~/.vimrc"
     end
@@ -177,9 +173,7 @@ function __configure_vim__root
     end
 end
 
-#--- End of VIM configuration ---#
-
 begin
-    __configure_git__root
-    __configure_vim__root
+    __configure_git
+    __configure_vim
 end 2>&1 | tee -a ~/log/bootstrap-root.log
