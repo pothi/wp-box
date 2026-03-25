@@ -1,50 +1,82 @@
 #!/usr/bin/env fish
 
+set --local ver 2.0
+
 # https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
-set BinDir ~/.local/bin
-set InstallDir ~/.local/aws-cli
-set fish_completion_dir ~/.config/fish/completions
+set -l debug
+
+set --local BinDir ~/.local/bin
+set --local InstallDir ~/.local/aws-cli
+set --local fish_completion_dir ~/.config/fish/completions
+
+if not type -q check_status
+    function check_status -a return_value error_message
+        if test $return_value -ne 0; echo >&2 -e "\nError: $error_message\n"; exit "$return_value"; end
+    end
+end
 
 # attempt to create BinDir and fish_completion_dir
-test -d ~/tmp || mkdir -p ~/tmp
-test -d $BinDir || mkdir -p $BinDir
-if not test $status
-    echo >&2 "BinDir is not found at $BinDir. This script can't create it, either!"
-    echo >&2 'You may create it manually and re-run this script.'
-    exit 1
-end
+test -d $BinDir; or mkdir -p $BinDir
+check_status $status "Could not create $BinDir folder"
+test -d "$fish_completion_dir"; or mkdir -p "$fish_completion_dir"
+check_status $status "Could not create $fish_completion_dir folder"
 
 # add PATH
 fish_add_path $BinDir
 
-test -d "$fish_completion_dir" || mkdir -p "$fish_completion_dir"
-if not test $status
-    echo >&2 "[Warn] fish_completion_dir is not found at $fish_completion_dir. This script can't create it, either!"
-    echo >&2 'You may create it manually and re-run this script.'
-end
+set -l tmpfile (mktemp)
+rm $tmpfile
+set -l tmpdir (mktemp -d)
+set -l aws_cli "$BinDir/aws"
 
-set tmpfile ~/tmp/aws_cli_v2.zip
-set aws_cli "$BinDir/aws"
+set __os
+set __arch
+
+switch (uname)
+    case Linux
+        set __os linux
+    case Darwin
+        # set __os darwin
+        echo >&2 'macOS is not supported by this script.'
+        echo >&2 'See: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html'
+        exit 1
+    case '*'
+        echo >&2 'Unknown OS'; exit;
+end
+test -z $debug; or echo "OS: $__os"
+
+set -l arch (uname -m)
+switch $arch
+    case amd64 x86_64
+        set __arch x86_64
+    case arm64 aarch64
+        set __arch aarch64
+    case '*'
+        echo >&2 "Unknown architecture: $arch"; exit;
+end
+test -z $debug; or echo "Arch: $__arch"
+
+test -z $debug; echo Temp File: $tmpfile
+test -z $debug; echo Temp Dir: $tmpdir
 
 printf '%-72s' "Downloading AWS CLI..."
-set aws_cli_url https://awscli.amazonaws.com/awscli-exe-linux-$(arch).zip
-if ! curl -LSs -o $tmpfile $aws_cli_url; then
-    echo >&2 'aws-cli: error downloading aws cli'
-    exit 1
-end
-unzip -qq -d ~/tmp/ $tmpfile
+curl -LSs -o $tmpfile.zip https://awscli.amazonaws.com/awscli-exe-linux-$__arch.zip
+check_status $status 'Could not download aws cli'
+
+command -q unzip; or check_status $status 'Unzip is not installed.'
+unzip -qq -d $tmpdir $tmpfile.zip
 
 if not test -s "$aws_cli"
     # Install aws cli
-    if ~/tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir > /dev/null
+    if $tmpdir/aws/install --install-dir $InstallDir --bin-dir $BinDir > /dev/null
         chmod +x "$aws_cli"
     else
         echo >&2 Error installing aws cli.
     end
 else
     # Update aws cli, if existing installation is found
-    if not ~/tmp/aws/install --install-dir $InstallDir --bin-dir $BinDir --update > /dev/null
+    if not $tmpdir/aws/install --install-dir $InstallDir --bin-dir $BinDir --update > /dev/null
         echo >&2 Error updating aws cli.
     end
 end
@@ -52,10 +84,10 @@ end
 echo done.; echo
 
 # check the installation
-aws --version
+aws --version; or check_status $status 'aws-cli installation failed.'
 
-rm $tmpfile
-rm -rf ~/tmp/aws # created when unziping the downloaded aws cli zip file
+rm $tmpfile.zip
+rm -rf $tmpdir
 
 # include PATH into cron, if PATH doesn't exist
 crontab -l | grep -qF "PATH="
