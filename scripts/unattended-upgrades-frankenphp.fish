@@ -6,7 +6,7 @@
 
 set ver 1.1
 
-set package "FrankenPHP"
+set package_name "FrankenPHP"
 set apt_identifier frankenphp
 
 # what's done here
@@ -40,10 +40,34 @@ else
 end
 
 echo
-echo 'Unattended upgrade for $package is configured. Test it out with the command `unattended-upgraded --dry-run`.'
+echo 'Unattended upgrade for $package_name is configured. Test it out with the command `unattended-upgraded --dry-run`.'
 
 
 echo
-echo "To disable unattended upgrades for $package, remove the file $apt_file."
+echo "To disable unattended upgrades for $package_name, remove the file $apt_file."
 echo
 
+set disable_warning /etc/apt/apt.conf.d/90disablescriptwarning
+echo Creating $disable_warning to disable warning message/s from apt.
+test -f $disable_warning; or echo "Apt::Cmd::Disable-Script-Warning \"true\";" > $disable_warning
+echo
+
+echo Running tests...
+
+# check if the package is available for upgrade
+echo Checking if $package_name has a pending upgrade...
+apt list --installed | grep -q $package_name
+if test $status -eq 0
+    echo $package_name has a pending upgrade.
+
+    echo Dry-running unattended-upgrade...
+    unattended-upgrade --dry-run 2>&1 | grep -q $package_name
+    if test $status -eq 0
+        echo Dry-run successfully upgraded $package_name.
+    else
+        echo Dry-run did not upgrade $package_name
+        echo Check if anything went wrong above.
+    end
+else
+    echo $package_name does not have any pending upgrade.
+end
