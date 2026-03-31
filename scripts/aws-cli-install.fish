@@ -11,7 +11,7 @@ set --local ver 2.0
 set -l debug
 
 set --local BinDir ~/.local/bin
-set --local InstallDir ~/.local/aws-cli
+set --local InstallDir ~/.local/share/aws-cli
 set --local fish_completion_dir ~/.config/fish/completions
 
 if not type -q check_status
