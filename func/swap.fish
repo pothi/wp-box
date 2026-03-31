@@ -1,11 +1,14 @@
 # To be placed in $fish_function_path
 # most likely in /etc/fish/functions
 
-set ver 1.5
+set ver 1.6
 
 #TODO: auto-update, show swap size in rounded GBs.
 
 # changelog
+# version: 1.6
+#   - date: 2026-03-30
+#   - better output
 # version: 1.5
 #   - date: 2026-03-29
 #   - improve addition and deletion process
@@ -147,6 +150,7 @@ function __swap_delete
     systemctl daemon-reload
     check_status_func $status 'Failure reloading systemctl daemon'; or return $status
 
+    echo Here\'s the swap info...
     free -m | sed '/^Mem/d' | sed 's/free.*/free/'
 end
 
@@ -155,7 +159,7 @@ function __swap_add -a swap_size
     set -l is_swap_enabled $(free | grep -iw swap | awk {'print $2'}) # 0 means no swap
 
     if test "$is_swap_enabled" -eq 0
-        # echo $swap_size
+        echo Swap Size: "$swap_size"GB
 
         # printf '%-72s' 'Creating and setting up Swap...'
         # echo -----------------------------------------------------------------------------
@@ -223,6 +227,7 @@ function __swap_add -a swap_size
         # sysctl -p $swap_sysctl_file
 
         # echo -----------------------------------------------------------------------------
+        echo Here\'s the swap info...
         free -m | sed '/^Mem/d' | sed 's/free.*/free/'
     else
         echo Swap is already active.
