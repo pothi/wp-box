@@ -30,18 +30,13 @@ echo
 echo "To disable unattended upgrades for fish shell, remove the file $apt_file."
 echo
 
-set disable_warning /etc/apt/apt.conf.d/90disablescriptwarning
-echo Creating $disable_warning to disable warning message/s from apt.
-test -f $disable_warning; or echo "Apt::Cmd::Disable-Script-Warning \"true\";" > $disable_warning
-echo
-
 echo Running tests...
 
 set package_name fish
 
 # check if the package is available for upgrade
 echo Checking if $package_name has a pending upgrade...
-apt list --installed | grep -q $package_name
+apt list --installed $package_name 2>/dev/null
 if test $status -eq 0
     echo $package_name has a pending upgrade.
 
@@ -54,5 +49,5 @@ if test $status -eq 0
         echo Check if anything went wrong above.
     end
 else
-    echo $package_name does not have any pending upgrade.
+    echo $package_name does not have a pending upgrade.
 end
