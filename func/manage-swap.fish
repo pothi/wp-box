@@ -1,11 +1,14 @@
 # To be placed in $fish_function_path
 # most likely in /etc/fish/functions
 
-set ver 1.6
+set ver 1.7
 
 #TODO: auto-update, show swap size in rounded GBs.
 
 # changelog
+# version: 1.7
+#   - date: 2026-03-31
+#   - change name (from swap.fish to manage-swap.fish)
 # version: 1.6
 #   - date: 2026-03-30
 #   - better output
@@ -29,8 +32,8 @@ if not type -q check_status_func
     end
 end
 
-function swap -d 'Create or delete swap'
-    argparse --name=swap 'v/version' 's/show' 'h/help' 'd/delete' 'c/create=!_validate_int --min 1' 'i/increase' -- $argv
+function manage-swap -d 'Create or delete swap'
+    argparse 'v/version' 's/show' 'h/help' 'd/delete' 'c/create=!_validate_int --min 1' 'i/increase' -- $argv
     or return
 
     if set -q _flag_version
