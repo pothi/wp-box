@@ -2,7 +2,7 @@
 
 set package_name do-agent
 set config_file /etc/apt/apt.conf.d/51unattended-upgrades-$package_name
-set apt_origin (apt-cache policy | grep -A2 $package_name | grep release | sed 's/release//' | awk -F, '{print $1}' | awk -F= '{print $2}')
+set apt_origin (apt-cache policy | grep -A2 $package_name | grep release | head -1 | sed 's/release//' | awk -F, '{print $1}' | awk -F= '{print $2}')
 
 echo "Origin: $apt_origin"
 

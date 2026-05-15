@@ -1,17 +1,21 @@
 #!usr/bin/env fish
 
-set package_name caddy
+set package_name mysql
+set config_file /etc/apt/apt.conf.d/51unattended-upgrades-$package_name
 set apt_origin (apt-cache policy | grep -A2 $package_name | grep release | head -1 | sed 's/release//' | awk -F, '{print $1}' | awk -F= '{print $2}')
 
 echo "Origin: $apt_origin"
 
 set unattended_policy "Unattended-Upgrade::Origins-Pattern { \"origin=$apt_origin\" };"
+echo Policy: $unattended_policy
+echo
 
-echo Unattended policy: $unattended_policy
+# Create the unattended-upgrade config file.
+echo $unattended_policy > $config_file
 
-echo $unattended_policy > /etc/apt/apt.conf.d/51unattended-upgrades-$package_name
-
+echo Contents of $config_file
 cat /etc/apt/apt.conf.d/51unattended-upgrades-$package_name
+echo
 
 echo Unattended upgrade is configured for $package_name
 
@@ -42,3 +46,4 @@ if test $status -eq 0
 else
     echo $package_name does not have any pending upgrade.
 end
+
