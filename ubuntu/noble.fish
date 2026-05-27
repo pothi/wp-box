@@ -182,10 +182,10 @@ printf '%-72s' "Restarting Nginx..."
 nginx -t 2>/dev/null && systemctl restart nginx
 echo done.
 
-wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/user_add.fish
-wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/sudo_add.fish
+wget -q https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/user_add.fish
+wget -q https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/sudo_add.fish
 
-wget https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/certbot-init.fish
+wget -q https://github.com/pothi/wp-box/raw/refs/heads/main/scripts/certbot-init.fish
 
 function enable_passwd_auth_for_group
 end
