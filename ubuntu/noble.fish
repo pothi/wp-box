@@ -142,7 +142,7 @@ sed -i '/max_input_vars/ s/;\? \?\(max_input_vars \?= \?\)[[:digit:]]\+/\1'$user
 
 # Setup timezone
 echo "Configuring timezone to $user_timezone ..."
-sed -i -e 's/^;date\.timezone =$/date.timezone = "'$user_timezone'"/' $fpm_ini_file
+sed -i -e 's:^;date\.timezone =$:date.timezone = "'$user_timezone'":' $fpm_ini_file
 set PHP_PCNTL_FUNCTIONS 'pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare'
 set PHP_EXEC_FUNCTIONS 'escapeshellarg,escapeshellcmd,exec,passthru,proc_close,proc_get_status,proc_nice,proc_open,proc_terminate,shell_exec,system'
 sed -i "/disable_functions/c disable_functions = $PHP_PCNTL_FUNCTIONS,$PHP_EXEC_FUNCTIONS" $fpm_ini_file
