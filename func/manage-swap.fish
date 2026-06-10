@@ -1,11 +1,14 @@
 # To be placed in $fish_function_path
 # most likely in /etc/fish/functions
 
-set ver 1.7
+set ver 2.0
 
 #TODO: auto-update, show swap size in rounded GBs.
 
 # changelog
+# 2.0
+#   - date: 2026-06-08
+#   - add purging swap into memory
 # version: 1.7
 #   - date: 2026-03-31
 #   - change name (from swap.fish to manage-swap.fish)
@@ -33,7 +36,7 @@ if not type -q check_status_func
 end
 
 function manage-swap -d 'Create or delete swap'
-    argparse 'v/version' 's/show' 'h/help' 'd/delete' 'c/create=!_validate_int --min 1' 'i/increase' -- $argv
+    argparse 'v/version' 's/show' 'h/help' 'd/delete' 'c/create=!_validate_int --min 1' 'i/increase' 'p/purge' -- $argv
     or return
 
     if set -q _flag_version
@@ -83,6 +86,18 @@ function manage-swap -d 'Create or delete swap'
         return 0
     end
 
+    if set -q _flag_purge
+        printf '%-66s' 'Please hold on while purging swap into memory...'
+        fish_is_root_user; or check_status_func $status 'This function requires root privilege.'; or return $status
+        swapoff -a
+        check_status_func $status 'Could not finish swapoff'
+        sleep 2
+        swapon -a
+        check_status_func $status 'Could not run swapon'
+        echo done.
+        return 0
+    end
+
     # The following is executed when no other option is selected.
     # printf (_ "%ls: Expected at least %d args, got only %d\n") funcsave 1 0 >&2
     # free -m | sed '/^Mem/d' | sed 's/free.*/free/'
@@ -102,6 +117,7 @@ function __swap_print_help
     printf '\t%s\t%s\n' "-c, --create" "Create a swap with the given size in GBs (default 1)."
     printf '\t%s\t%s\n' "-i, --increase" "Increase the swap size to the given size."
     printf '\t%s\t%s\n' "-d, --delete" "Delete the existing swap, if any."
+    printf '\t%s\t%s\n' "-p, --purge" 'Purge swap into memory'
     printf '\t%s\t%s\n' "-s, --show" "Show swap info."
     printf '\t%s\t%s\n' "-v, --version" "Prints the version info"
     printf '\t%s\t%s\n' "-h, --help" "Prints help"
@@ -164,7 +180,7 @@ function __swap_add -a swap_size
     if test "$is_swap_enabled" -eq 0
         echo Swap Size: "$swap_size"GB
 
-        # printf '%-72s' 'Creating and setting up Swap...'
+        # printf '%-66s' 'Creating and setting up Swap...'
         # echo -----------------------------------------------------------------------------
 
         # check for swap file
@@ -188,7 +204,7 @@ function __swap_add -a swap_size
         echo Marked $swap_file as swap
 
         # enable swap
-        # printf '%-72s' "Waiting for swap file to get ready..."
+        # printf '%-66s' "Waiting for swap file to get ready..."
         # sleep $sleep_time_between_tasks
         # echo done.
 
