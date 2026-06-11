@@ -1,4 +1,4 @@
-#!usr/bin/env fish
+#!/usr/bin/env fish
 
 set package_name caddy
 set apt_origin (apt-cache policy | grep -A2 $package_name | grep release | head -1 | sed 's/release//' | awk -F, '{print $1}' | awk -F= '{print $2}')

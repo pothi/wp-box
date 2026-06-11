@@ -1,4 +1,4 @@
-#!usr/bin/env fish
+#!/usr/bin/env fish
 
 set package_name mysql
 set config_file /etc/apt/apt.conf.d/51unattended-upgrades-$package_name
