@@ -3,12 +3,22 @@
 # Requirements:
 #   - php_ver
 
+set ver 1.2
+
+#TODO
+#   - by default, just display the usage / help info
+#   - random username using -r/--random option
+#   - supply username using -u/--user option
+#   - supply password using -p/--pass option
+#   - enable sudo using -s/--sudo option
+#   - get the value of php_ver automatically from the installed PHP.
+
 set php_ver 8.3
 
 function user_add -a the_user the_pass enable_sudo
     # echo PHP Version: $php_ver; exit
 
-    # if php_ver is 6.0 then php_ver_short is 60
+    # if php_ver is 8.0 then php_ver_short is 80
     set php_ver_short $(echo $php_ver | tr -d \.)
 
     echo This script adds a new user, creates a password and may enable sudo privileges!; echo
@@ -20,8 +30,15 @@ function user_add -a the_user the_pass enable_sudo
         ;
     end
 
-    # configure the HOME - if an underscore exists in the username, then drop the rest
-    set the_home $(echo $the_user | awk -F _ '{print $1}')
+    # configure $HOME
+    # first user will be assigned to /home/web
+    # if an underscore exists in the username, then drop the rest
+    #   useful when having multiple users in a server
+    if not test -d /home/web
+        set the_home web
+    else
+        set the_home $(echo $the_user | awk -F _ '{print $1}')
+    end
 
     # create the user
     if not id -u $the_user &>/dev/null
@@ -76,5 +93,12 @@ function user_add -a the_user the_pass enable_sudo
 end
 
 # TODO: fish_add_path ~/.local/bin
-user_add $argv[1]
+user_add $argv 2>&1 | tee -a ~/log/(status basename | awk -F. '{print $1}').log
+
+# usage
 # user_add pothi 'My-Complex_Password;2024'
+
+# Changelog
+# version 1.1
+#   - date: 2026-06-08
+#   - configure /home/web as $HOME for first user.
