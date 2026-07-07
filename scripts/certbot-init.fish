@@ -6,7 +6,7 @@
 # TODO
 # install certbot-dns-* plugins via snap
 
-set CERTBOT_ADMIN_EMAIL
+set CERTBOT_ACCOUNT_EMAIL
 set restart_script /etc/letsencrypt/renewal-hooks/deploy/nginx-restart.sh
 
 function certbot-init -d 'Initialize, register or update certbot'
@@ -20,13 +20,13 @@ function certbot-init -d 'Initialize, register or update certbot'
 
     # update certbot account if email is supplied
     if set -q _flag_update
-        set CERTBOT_ADMIN_EMAIL $_flag_update
-        # echo "Supplied Email: $CERTBOT_ADMIN_EMAIL"
+        set CERTBOT_ACCOUNT_EMAIL $_flag_update
+        # echo "Supplied Email: $CERTBOT_ACCOUNT_EMAIL"
         # return 0
         if not certbot show_account &> /dev/null
-            certbot -m $CERTBOT_ADMIN_EMAIL --agree-tos --no-eff-email register
+            certbot -m $CERTBOT_ACCOUNT_EMAIL --agree-tos --no-eff-email register
         else
-            certbot update_account --email $CERTBOT_ADMIN_EMAIL --no-eff-email
+            certbot update_account --email $CERTBOT_ACCOUNT_EMAIL --no-eff-email
             # certbot show_account
         end
         return 0
@@ -34,8 +34,8 @@ function certbot-init -d 'Initialize, register or update certbot'
 
     # register certbot account if email is supplied
     if set -q _flag_register
-        set CERTBOT_ADMIN_EMAIL $_flag_register
-        # echo "Supplied Email: $CERTBOT_ADMIN_EMAIL"
+        set CERTBOT_ACCOUNT_EMAIL $_flag_register
+        # echo "Supplied Email: $CERTBOT_ACCOUNT_EMAIL"
         # return 0
 
         # install certbot
@@ -44,7 +44,7 @@ function certbot-init -d 'Initialize, register or update certbot'
         end
 
         if not certbot show_account &> /dev/null
-            certbot -m $CERTBOT_ADMIN_EMAIL --agree-tos --no-eff-email register
+            certbot -m $CERTBOT_ACCOUNT_EMAIL --agree-tos --no-eff-email register
         else
             certbot show_account
             echo A certbot account already exists. If you wish to override it, use the --update option.
