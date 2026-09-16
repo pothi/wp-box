@@ -75,4 +75,7 @@ if test -d $MYSQL_DIR
     du -sh $MYSQL_DIR
 end
 
+# Default 3 - to reduce the disk space used by snap revisions
+snap set system refresh.retain=2
+
 echo "=== Optimization Complete ==="
